@@ -1,0 +1,24 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'styles.css' %}">
+
+<h1 >
+    Enter name of movie
+</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="search" name="movie"/>
+    <br>
+    <br>
+    <button>Get recommendations</button> 
+</form>
+
+{% if json_data %}
+<h1>Recommendations: </h1>
+{% for i in json_data.results %}
+    <h4>Title = {{i.title}}</h4>
+    <img src="https://www.themoviedb.org/t/p/w1280/{{i.poster_path}}" width="120px">
+{% endfor %}
+
+{% endif %}
