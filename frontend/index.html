@@ -1,24 +1,87 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'styles.css' %}">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recommender</title>
+  </head>
 
-<h1 >
-    Enter name of movie
-</h1>
+  <body>
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@trevoreyre/autocomplete-js/dist/style.css"
+    />
 
-<form method="POST">
-    {% csrf_token %}
-    <input type="search" name="movie"/>
-    <br>
-    <br>
-    <button>Get recommendations</button> 
-</form>
+    <nav class="navbar bg-dark">
+      <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1" style="color: white"
+          >Recommender</span
+        >
+      </div>
+    </nav>
 
-{% if json_data %}
-<h1>Recommendations: </h1>
-{% for i in json_data.results %}
-    <h4>Title = {{i.title}}</h4>
-    <img src="https://www.themoviedb.org/t/p/w1280/{{i.poster_path}}" width="120px">
-{% endfor %}
+    <div
+      id="autocomplete"
+      class="autocomplete container align-items-center"
+      style="max-width: 60%; align-self: center; margin-top: 10%"
+    >
+      <input
+        name="search"
+        class="autocomplete-input"
+        placeholder="Enter Movie name"
+      />
+      <ul class="autocomplete-result-list"></ul>
+    </div>
+    <form method="GET" action="/movie">
+      <!-- {% csrf_token %} -->
+      <input type="search" name="movie" />
+      <br />
+      <br />
+      <button>Get recommendations</button>
+    </form>
 
-{% endif %}
+    {% if json_data %}
+    <div class="container">
+      <h1 class="row ms-md-5 mb-md-5">Recommendations:</h1>
+
+      {% for i in json_data.results %}
+      <div class="container">
+        <div
+          class="card mt-4"
+          style="
+            max-width: 80%;
+            max-height: fit-content;
+            margin: auto;
+            float: none;
+          "
+        >
+          <div class="row g-0">
+            <div class="col-md-3">
+              <img
+                src="https://www.themoviedb.org/t/p/w1280/{{i.poster_path}}"
+                class="img-fluid rounded-start"
+                style="max-height: fit-content"
+              />
+            </div>
+            <div class="col-md-8">
+              <div class="card-body ms-md-2">
+                <h5 class="card-title">{{i.title}}</h5>
+                <p class="card-text">{{i.overview}}</p>
+                <a href="#" class="btn btn-primary">Stream here</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %} {% endif %}
+    </div>
+
+    <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
+    <script src="{% static 'jquery-3.6.1.min.js' %}"></script>
+    <script src="{% static 'search.js' %}"></script>
+    <script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+  </body>
+</html>
