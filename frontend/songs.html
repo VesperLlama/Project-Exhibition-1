@@ -25,13 +25,13 @@
         <form
           class="form-inline col-md"
           method="POST"
-          action="/movie/"
+          action="/artist/"
           style="max-width: 60%"
         >
           {% csrf_token %}
           <div class="input-group">
             <input
-              placeholder="Enter Movie Name"
+              placeholder="Enter Artist Name"
               class="form-control"
               id="tags"
               type="search"
@@ -49,9 +49,9 @@
     <div class="container mt-md-5">
       <h1 class="row ms-md-5 mb-md-5">Recommendations:</h1>
       <div class="row">
-        {% for i in json_data.results %}
+        {% for i in json_data.similarartists.artist %}
 
-        <div class="container">
+        <!-- <div class="container">
         <div
           class="card mt-4"
           style="
@@ -78,23 +78,23 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
-        <!-- <div class="col mb-md-5">
+        <div class="col mb-md-5">
           <div class="card" style="width: 15rem">
             <img
               src="https://www.themoviedb.org/t/p/w1280/{{i.poster_path}}"
               class="card-img-top"
             />
             <div class="card-body" style="max-height: fit-content">
-              <h5 class="card-title">{{i.title}}</h5>
+              <h5 class="card-title">{{i.name}}</h5>
               <p class="card-text">
                 {{i.overview}}
               </p>
-              <a href="#" class="btn btn-primary">Stream Here</a>
+              <a href="{{i.url}}" class="btn btn-primary" target="_blank">Check Here</a>
             </div>
           </div>
-        </div> -->
+        </div>
         {% endfor %} {% endif %}
       </div>
     </div>
@@ -105,7 +105,7 @@
 
     <script>
       $("#tags").autocomplete({
-        source: "{% url 'search_movie' %}",
+        source: "{% url 'search_artist' %}",
       });
     </script>
   </body>
