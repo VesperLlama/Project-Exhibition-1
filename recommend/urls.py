@@ -9,6 +9,7 @@ urlpatterns = [
     path('movie/', views.getMovie, name='movie'),
     path('search_artist/', views.searchArtist, name='search_artist'),
     path('artist/', views.getArtist, name='artist'),
-    path('songs/', views.songs, name='songs'),
+    path('songs/', views.getSongs, name='songs'),
+    path('search_songs/', views.searchSongs, name='search_songs'),
 
 ]
