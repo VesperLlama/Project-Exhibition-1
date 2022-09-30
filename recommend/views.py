@@ -65,62 +65,6 @@ def getMovie(request):
     return render(request, "index.html", {"json_data": json_data})
 
 
-def getArtist(request):
-    if request.method == "POST":
-        artist = str(urllib.parse.quote(request.POST.get("search")))
-        res = urllib.request.urlopen(
-            "https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist="
-            + artist
-            + "&limit=15&api_key="
-            + keys.lastfm_key
-            + "&format=json"
-        ).read()
-        json_data = json.loads(res)
-        for x in range(15):
-            mbid = [json_data["similarartists"]["artist"][x]["mbid"]]
-        x = 0
-        for i in mbid:
-            img = urllib.request.urlopen(
-                "https://musicbrainz.org/ws/2/artist/"
-                + mbid[x]
-                + "?inc=url-rels&fmt=json"
-            ).read()
-            if img["relations"]["type"] == image:
-                img_src.append(img["url"]["resource"])
-            if img_src[x].startswith("https://commons.wikimedia.org/wiki/File:"):
-                filename = image_url.substring(image_url.lastIndexOf("/") + 1)
-                img_src[x] = (
-                    "https://commons.wikimedia.org/wiki/Special:Redirect/file/"
-                    + filename
-                )
-    else:
-        json_data = {}
-
-    return render(request, "artists.html", {"json_data": json_data, "img_src": img_src})
-
-
-def searchArtist(request):
-    if request.method == "GET":
-        artist = str(urllib.parse.quote(request.GET.get("term")))
-        id = []
-        res = urllib.request.urlopen(
-            "https://ws.audioscrobbler.com/2.0/?method=artist.search&artist="
-            + artist
-            + "&api_key="
-            + keys.lastfm_key
-            + "&format=json"
-        ).read()
-        json_data = json.loads(res)
-        x = 0
-        for i in json_data["results"]["artistmatches"]["artist"]:
-            id.append(str(json_data["results"]["artistmatches"]["artist"][x]["name"]))
-            x = x + 1
-
-        return JsonResponse(id, safe=False)
-    else:
-        id = []
-
-
 def searchSongs(request):
     if request.method == "GET":
         track = str((urllib.parse.quote(request.GET.get("term"))))
