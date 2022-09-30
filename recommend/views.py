@@ -2,6 +2,8 @@ from django.shortcuts import render
 import json
 import urllib.request
 import urllib.parse
+import random
+import musicbrainzngs as mb
 from . import keys
 from django.http import JsonResponse
 
@@ -45,7 +47,6 @@ def getMovie(request):
         id_data = json.loads(id)
         id = ""
         id = str(id_data["results"][0]["id"])
-        print(id)
 
         # Get the recommendations
         res = urllib.request.urlopen(
@@ -148,37 +149,19 @@ def searchSongs(request):
         id = []
 
 
-def getSongs(request):
-    if request.method == "POST":
-        search = str(request.POST.get("search")).split(" - ")
-        track = str(urllib.parse.quote(search[0]))
-        artist = str((urllib.parse.quote(search[1])))
-        res = urllib.request.urlopen(
-            "https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist="
-            + artist
-            + "&track="
-            + track
-            + "&limit=15&api_key="
-            + keys.lastfm_key
-            + "&format=json"
-        ).read()
-        json_data_s = json.loads(res)
-        covers = getCovers(json_data_s)
-        x = 0
-        for i in covers:
-            json_data_s["similartracks"]["track"][x]["image"] = covers[x]
-            x += 1
-    else:
-        json_data_s = {}
-
-    return render(request, "index.html", {"json_data_s": json_data_s})
-
-
 def getCovers(info):
     covers = []
-    for i in info["similartracks"]["track"]:
+    mb.set_useragent("Recommender", "1.0", "contact")
+    for i in info["tracks"]:
         track = str(urllib.parse.quote(i["name"]))
         artist = str(urllib.parse.quote(i["artist"]["name"]))
+        track2 = i["name"]
+        artist2 = i["artist"]["name"]
+        mbid = ""
+        try:
+            mbid = i["mbid"]
+        except:
+            pass
         res = urllib.request.urlopen(
             "https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key="
             + keys.lastfm_key
@@ -189,9 +172,75 @@ def getCovers(info):
             + "&format=json"
         ).read()
         json_data = json.loads(res)
-        covers.append(json_data["track"]["album"]["image"][3]["#text"])
+        try:
+            covers.append(json_data["track"]["album"]["image"][3]["#text"])
+        except:
+            if mbid:
+                resp = urllib.request.urlopen(
+                    "https://coverartarchive.org/release/" + mbid
+                ).read()
+                json_data_id = json.load(resp)
+                print(json_data_id)
+                covers.append(json_data_id["images"][0]["thumbnails"]["large"])
+            else:
+                try:
+                    search = track2 + " - " + artist2
+                    result = mb.search_releases(search, 3)
+                    mbid = result["release-list"][0]["id"]
+                    image_src = mb.get_image_list(mbid)
+                    covers.append(image_src["images"][0]["thumbnails"]["large"])
+                except:
+                    covers.append("/static/placeholder.webp")
 
     return covers
+
+
+def getSongs(request):
+    if request.method == "POST":
+        search = str(request.POST.get("search")).split(" - ")
+        artist = str((urllib.parse.quote(search[1])))
+        res = urllib.request.urlopen(
+            "https://ws.audioscrobbler.com/2.0/?method=artist.getSimilar&artist="
+            + artist
+            + "&limit=10&api_key="
+            + keys.lastfm_key
+            + "&format=json"
+        ).read()
+        artist = []
+        x = 0
+        json_data = json.loads(res)
+        for i in json_data["similarartists"]["artist"]:
+            artist.append(json_data["similarartists"]["artist"][x]["name"])
+            x += 1
+        x = 0
+        json_data_s = {}
+        json_data_s["tracks"] = []
+        for i in artist:
+            res = urllib.request.urlopen(
+                "https://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&artist="
+                + str(urllib.parse.quote(i))
+                + "&limit=2&api_key="
+                + keys.lastfm_key
+                + "&format=json"
+            ).read()
+            json_data = json.loads(res)
+            for y in range(2):
+                x += 1
+                json_data_s["tracks"].append(json_data["toptracks"]["track"][y])
+            if x == 16:
+                break
+        random.shuffle(json_data_s["tracks"])
+        covers = getCovers(json_data_s)
+        x = 0
+        for i in covers:
+            json_data_s["tracks"][x]["image"] = covers[x]
+            x += 1
+
+    else:
+        json_data = {}
+        json_data_s = []
+
+    return render(request, "index.html", {"json_data_s": json_data_s})
 
 
 def index(request):

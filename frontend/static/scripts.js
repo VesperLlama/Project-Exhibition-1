@@ -1,6 +1,7 @@
 const movie = document.getElementById("movies");
 const songs = document.getElementById("songs");
 const btn = document.getElementById("btn-switch");
+const load = document.getElementById("loadMore");
 
 var retrievedObject = localStorage.getItem('state');
 if(retrievedObject == 'songs'){
