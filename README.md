@@ -6,8 +6,10 @@ This website will recommend movies and songs which are related to the input ente
 - Django web framework
 - TheMovieDB API key
 - Last.fm API key
+- musicbrainzngs
 
 
 ## Credits to -
-- TheMovieDB
-- Last.fm
+- [TheMovieDB](https://www.themoviedb.org/)
+- [Last.fm](https://www.last.fm/)
+- [musicbrainzngs](https://python-musicbrainzngs.readthedocs.io) python module 
